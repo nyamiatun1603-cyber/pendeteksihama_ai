@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deteksi Hama - Kamera</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    video {
+      width: 90%;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    h2 {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>📷 Deteksi Hama (HP 1)</h2>
+  <video id="webcam" autoplay playsinline muted></video><br>
+  <button onclick="init()">Mulai Kamera</button>
+  <h3 id="hasil">Menunggu kamera...</h3>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_Za2W3AJw3rq2xpUdGrCTk-bbulRE3Bs",
+      authDomain: "deteksi-hama-ai.firebaseapp.com",
+      projectId: "deteksi-hama-ai",
+      storageBucket: "deteksi-hama-ai.firebasestorage.app",
+      messagingSenderId: "492227435941",
+      appId: "1:492227435941:web:a1cc6cb2a8cea0b1e49c4c",
+      measurementId: "G-DV5DQRLS0Z"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    async function init() {
+      const URL = "https://nyamiatun1603-cyber.github.io/teachnable-hama/";
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
+
+      model = await tmImage.load(modelURL, metadataURL);
+      const flip = true;
+      webcam = new tmImage.Webcam(300, 300, flip);
+      await webcam.setup();
+      await webcam.play();
+      window.requestAnimationFrame(loop);
+
+      document.getElementById("webcam").srcObject = webcam.webcam;
+      maxPredictions = model.getTotalClasses();
+    }
+
+    async function loop() {
+      webcam.update();
+      await predict();
+      window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+      const prediction = await model.predict(webcam.canvas);
+      let top = prediction.sort((a, b) => b.probability - a.probability)[0];
+      document.getElementById("hasil").innerText =
+        `Deteksi: ${top.className} (${(top.probability * 100).toFixed(1)}%)`;
+      db.ref("deteksi").set({
+        hasil: top.className,
+        nilai: (top.probability * 100).toFixed(1),
+        waktu: new Date().toLocaleString()
+      });
+    }
+  </script>
+</body>
+</html>
