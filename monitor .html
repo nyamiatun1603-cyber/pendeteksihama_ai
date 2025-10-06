@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitor Hama (HP 2)</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #eef2f3;
+      margin: 0;
+      padding: 40px;
+    }
+    h2 {
+      color: #333;
+    }
+    #hasil {
+      margin-top: 30px;
+      padding: 20px;
+      font-size: 20px;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      min-width: 250px;
+    }
+  </style>
+</head>
+<body>
+  <h2>📊 Monitoring Deteksi Hama</h2>
+  <div id="hasil">Menunggu data...</div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_Za2W3AJw3rq2xpUdGrCTk-bbulRE3Bs",
+      authDomain: "deteksi-hama-ai.firebaseapp.com",
+      projectId: "deteksi-hama-ai",
+      storageBucket: "deteksi-hama-ai.firebasestorage.app",
+      messagingSenderId: "492227435941",
+      appId: "1:492227435941:web:a1cc6cb2a8cea0b1e49c4c",
+      measurementId: "G-DV5DQRLS0Z"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    db.ref("deteksi").on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        document.getElementById("hasil").innerHTML =
+          `🪲 <b>${data.hasil}</b><br>Probabilitas: ${data.nilai}%<br><small>${data.waktu}</small>`;
+      }
+    });
+  </script>
+</body>
+</html>
